@@ -60,7 +60,7 @@ A modern Pokémon web app built with React that lets users browse, search, and i
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/pokemon-explorer.git
+git clone https://github.com/ShamsAziz03/pokemon-website.git
 
 # Navigate into the project
 cd pokemon-explorer
