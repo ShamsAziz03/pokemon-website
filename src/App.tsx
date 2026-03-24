@@ -1,16 +1,17 @@
 import "./App.css";
-import PokemonCard from "./components/pokemonCard";
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from "./components/home";
+import AboutPokemon from "./components/aboutPokemon";
+
 
 function App() {
   return (
-    <>
-      <section className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-20">
-        <PokemonCard />
-        <PokemonCard />
-        <PokemonCard />
-        <PokemonCard />
-      </section>
-    </>
+   <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/aboutPokemon" element={<AboutPokemon />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
