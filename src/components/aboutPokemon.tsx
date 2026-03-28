@@ -1,108 +1,140 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 type PokemonExtraDetails = {
   about: string;
   category: string;
   gender: string;
-  weaknesses: string[];
 };
 
 function AboutPokemon() {
   const location = useLocation();
   const data = location.state;
+
   const [pokemonDetailsHtml, setPokemonDetailsHtml] = useState<any>([]);
 
-  const [pokemonExtraDetails, setPokemonExtraDetails] =
-    useState<PokemonExtraDetails>({
+  async function getAboutCategoryGender(id: string) {
+    let pokemonExtraDetails: PokemonExtraDetails = {
       about: "",
       category: "",
       gender: "",
-      weaknesses: [],
-    });
+    };
+
+    let numberId = id.split(" ")[1];
+    const details = await Axios.get(
+      `https://pokeapi.co/api/v2/pokemon-species/${numberId}`,
+    );
+
+    //return first about in english language
+    const about = details.data.flavor_text_entries.find(
+      (t: { language: { name: string } }) => t.language.name === "en",
+    );
+    pokemonExtraDetails.about = about.flavor_text;
+
+    //return first 3 categories in english language
+    const category = details.data.genera
+      .filter(
+        (g: { genus: string; language: { name: string } }) =>
+          g.language.name === "en",
+      )
+      .map((g: { genus: string }) => g.genus)
+      .slice(0, 3)
+      .join(", ");
+    pokemonExtraDetails.category = category;
+
+    const genderRate = Number(details.data.gender_rate);
+    if (!Number.isNaN(genderRate)) {
+      if (genderRate === 8) pokemonExtraDetails.gender = "Female";
+      else if (genderRate === 0) pokemonExtraDetails.gender = "Male";
+      else pokemonExtraDetails.gender = "Mixed";
+    }
+    return pokemonExtraDetails;
+  }
+
+  async function getWeaknessesForType(type: string, weaknesses: string[]) {
+    const result = await Axios.get(`https://pokeapi.co/api/v2/type/${type}`);
+
+    result.data.damage_relations.double_damage_from.forEach(
+      (obj: { name: string }) => {
+        if (!weaknesses.includes(obj.name)) {
+          weaknesses.push(obj.name);
+        }
+      },
+    );
+  }
+
+  async function getWeaknesses(types: string[]) {
+    let weaknesses: string[] = [];
+    const promises = types.map((t) => getWeaknessesForType(t, weaknesses));
+    await Promise.all(promises);
+    return weaknesses;
+  }
 
   useEffect(() => {
-    async function getAboutCategoryGender(id: string) {
-      let numberId = id.split(" ")[1];
-      const details = await Axios.get(
-        `https://pokeapi.co/api/v2/pokemon-species/${numberId}`,
-      );
-
-      //return first about in english language
-      const about = details.data.flavor_text_entries.find(
-        (t: { language: { name: string } }) => t.language.name === "en",
-      );
-      setPokemonExtraDetails((prev) => ({ ...prev, about: about.flavor_text }));
-
-      //return first 3 categories in english language
-      const category = details.data.genera
-        .filter(
-          (g: { genus: string; language: { name: string } }) =>
-            g.language.name === "en",
-        )
-        .map((g: { genus: string }) => g.genus)
-        .slice(0, 3)
-        .join(", ");
-      setPokemonExtraDetails((prev) => ({ ...prev, category: category }));
-
-      const genderRate = Number(details.data.gender_rate);
-      if (!Number.isNaN(genderRate)) {
-        if (genderRate === 8)
-          setPokemonExtraDetails((prev) => ({ ...prev, gender: "Female" }));
-        else if (genderRate === 0)
-          setPokemonExtraDetails((prev) => ({ ...prev, gender: "Male" }));
-        else setPokemonExtraDetails((prev) => ({ ...prev, gender: "Mixed" }));
-      }
-    }
-
-    async function getWeaknessesForType(type: string, weaknesses: string[]) {
-      const result = await Axios.get(`https://pokeapi.co/api/v2/type/${type}`);
-
-      result.data.damage_relations.double_damage_from.forEach(
-        (obj: { name: string }) => {
-          if (!weaknesses.includes(obj.name)) {
-            weaknesses.push(obj.name);
-          }
-        },
-      );
-
-      setPokemonExtraDetails((prev) => ({ ...prev, weaknesses: weaknesses }));
-    }
-
-    function getWeaknesses(types: string[]) {
-      let weaknesses: string[] = [];
-      types.forEach((t) => {
-        getWeaknessesForType(t, weaknesses);
-      });
-    }
-
-    getAboutCategoryGender(data.id);
-    getWeaknesses(data.types);
-
     //to create the content of html to prevent copy and paste 3 times
-    let arr: any[] = [];
-    for (let key in data) {
-      if (["height", "weight", "abilities"].includes(key)) {
-        arr.push(
-          <div className="flex flex-row gap-5" key={key}>
-            <p className="text-gary-400 text-xs font-medium">
-              {key.toUpperCase()}
-            </p>
-            <p
-              style={{ textShadow: "1px 1px 5px rgba(0,0,0,0.3)" }}
-              className="font-semibold text-gray-800 text-sm"
-            >
-              {data[key]}
-            </p>
-          </div>,
-        );
-      }
-    }
-    setPokemonDetailsHtml(arr);
+    let htmlCode = Object.keys(data)
+      .filter(
+        (key) => key === "height" || key === "weight" || key === "abilities",
+      )
+      .map((key) => (
+        <div className="flex flex-row gap-5" key={key}>
+          <p className="text-gary-400 text-xs font-medium">
+            {key.toUpperCase()}
+          </p>
+          <p
+            style={{ textShadow: "1px 1px 5px rgba(0,0,0,0.3)" }}
+            className="font-semibold text-gray-800 text-sm"
+          >
+            {data[key]}
+          </p>
+        </div>
+      ));
+
+    setPokemonDetailsHtml(htmlCode);
   }, []);
 
   // Object.keys
+
+  const {
+    isPending: pokemonExtraDetailsIsPending,
+    error: pokemonExtraDetailsError,
+    data: pokemonExtraDetails,
+  } = useQuery({
+    queryKey: ["pokemonExtraDetails"],
+    queryFn: () => getAboutCategoryGender(data.id),
+  });
+
+  const {
+    isPending: pokemonWeaknessesIsPending,
+    error: pokemonWeaknessesError,
+    data: pokemonWeaknesses,
+  } = useQuery({
+    queryKey: ["pokemonWeaknesses"],
+    queryFn: () => getWeaknesses(data.types),
+  });
+
+  if (pokemonExtraDetailsIsPending || pokemonWeaknessesIsPending)
+    return (
+      <h1
+        style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}
+        className="row-start-1 row-end-2 col-start-1 col-end-3 font-bold text-gray-800 text-2xl"
+      >
+        Loading...
+      </h1>
+    );
+
+  if (pokemonExtraDetailsError || pokemonWeaknessesError)
+    return (
+      <h1
+        style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}
+        className="row-start-1 row-end-2 col-start-1 col-end-3 font-bold text-gray-800 text-2xl"
+      >
+        An error has occurred:
+        {pokemonExtraDetailsError?.message || pokemonWeaknessesError?.message}
+      </h1>
+    );
 
   return (
     <section className="bg-gray-200 h-[100vh] flex flex-row justify-center items-center">
@@ -174,7 +206,7 @@ function AboutPokemon() {
               WEAKNESSES
             </p>
             <div className="flex flex-row gap-2 flex-wrap">
-              {pokemonExtraDetails.weaknesses.map((weak: string) => (
+              {pokemonWeaknesses.map((weak: string) => (
                 <div
                   key={weak}
                   style={{ textShadow: "1px 1px 5px rgba(0,0,0,0.3)" }}
