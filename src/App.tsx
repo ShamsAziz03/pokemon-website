@@ -1,17 +1,21 @@
 import "./App.css";
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/home";
 import AboutPokemon from "./components/aboutPokemon";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+const queryClient = new QueryClient();
 
 function App() {
   return (
-   <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/aboutPokemon" element={<AboutPokemon />} />
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/aboutPokemon" element={<AboutPokemon />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
