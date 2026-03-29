@@ -1,6 +1,8 @@
 import Axios from "axios";
 import { useQuery } from "@tanstack/react-query";
-
+import { FaSearch } from "react-icons/fa";
+import { useState } from "react";
+import Fuse from "fuse.js";
 import PokemonCard from "../components/pokemonCard";
 
 type Pokemon = {
@@ -14,6 +16,23 @@ type Pokemon = {
 };
 
 function Home() {
+  const [searchText, setSearchText] = useState("");
+
+  function search(data: string) {
+    let names = pokemonList?.map((pokemon) => pokemon.name) || [];
+    const fuse = new Fuse(names);
+    let filtered = [...(pokemonList || [])];
+    if (!data.trim()) {
+      filtered = [...(pokemonList || [])];
+    } else {
+      const findPokemons = fuse.search(data).map((result) => result.item);
+      filtered = (pokemonList || []).filter((pokemon) =>
+        findPokemons.includes(pokemon.name),
+      );
+    }
+    return filtered;
+  }
+
   async function getPokemonsList() {
     let list: Pokemon[] = [];
     for (let i = 0; i < 6; i++) {
@@ -42,6 +61,11 @@ function Home() {
     }
     return list;
   }
+
+  const pokemons = () => {
+    if (!searchText) return pokemonList || [];
+    return search(searchText);
+  };
 
   const {
     isPending,
@@ -74,8 +98,20 @@ function Home() {
 
   return (
     <>
+      <section className=" flex flex-row justify-center items-center p-5 gap-5">
+        <FaSearch size="20px" color="black" />
+        <input
+          id="input"
+          className="w-[50%] h-[30px] bg-gray-200 rounded-[20px] shadow-xl border-2 border-black text-sm font-semibold text-black p-5"
+          type="text"
+          placeholder="Search..."
+          onInput={(event: React.InputEvent<HTMLInputElement>) => {
+            setSearchText(event.currentTarget.value.trim());
+          }}
+        ></input>
+      </section>
       <section className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-20 p-10">
-        {pokemonList.map((pokemon: Pokemon) => {
+        {pokemons()?.map((pokemon: Pokemon) => {
           return (
             <div key={pokemon.id}>
               <PokemonCard pokemonDetails={pokemon} />
