@@ -10,12 +10,17 @@
 	},
 	"formatter": {
 		"enabled": true,
-		"indentStyle": "tab"
+		"indentStyle": "tab",
+		"lineEnding": "lf"
 	},
 	"linter": {
+		"includes": ["**/*"],
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": false,
+			"a11y": {
+				"useAltText": "error"
+			}
 		}
 	},
 	"javascript": {
@@ -24,10 +29,12 @@
 		}
 	},
 	"assist": {
+		"includes": ["**/*"],
 		"enabled": true,
 		"actions": {
 			"source": {
-				"organizeImports": "on"
+				"organizeImports": "on",
+				"useSortedAttributes": "on"
 			}
 		}
 	}
