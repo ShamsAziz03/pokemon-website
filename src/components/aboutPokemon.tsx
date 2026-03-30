@@ -92,12 +92,6 @@ function AboutPokemon() {
 					>
 						{data[key]}
 					</p>
-					<div
-						className="font-semibold text-gray-800 text-sm"
-						style={{ textShadow: "1px 1px 5px rgba(0,0,0,0.3)" }}
-					>
-						{data[key]}
-					</div>
 				</div>
 			));
 
