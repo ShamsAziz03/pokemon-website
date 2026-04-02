@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import Axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import type { JSX } from "react/jsx-dev-runtime";
+import { MdFavorite, MdOutlineFavoriteBorder } from "react-icons/md";
 import { useLocation } from "react-router-dom";
+import { UserContext } from "../contexts/context";
 
 type PokemonExtraDetails = {
 	about: string;
@@ -14,9 +16,12 @@ function AboutPokemon() {
 	const location = useLocation();
 	const data = location.state;
 
+	const { imp } = useContext(UserContext);
+
 	const [pokemonDetailsHtml, setPokemonDetailsHtml] = useState<JSX.Element[]>(
 		[],
 	);
+	const [isPressed, setIsPressed] = useState(false);
 
 	async function getAboutCategoryGender(id: string) {
 		const pokemonExtraDetails: PokemonExtraDetails = {
@@ -56,23 +61,32 @@ function AboutPokemon() {
 		return pokemonExtraDetails;
 	}
 
-	async function getWeaknessesForType(type: string, weaknesses: string[]) {
+	async function getWeaknessesForType(type: string) {
 		const result = await Axios.get(`https://pokeapi.co/api/v2/type/${type}`);
 
+		let typeWeaknesses: string[] = [];
 		result.data.damage_relations.double_damage_from.forEach(
 			(obj: { name: string }) => {
-				if (!weaknesses.includes(obj.name)) {
-					weaknesses.push(obj.name);
+				if (!typeWeaknesses.includes(obj.name)) {
+					typeWeaknesses.push(obj.name);
 				}
 			},
 		);
+		return typeWeaknesses;
 	}
 
 	async function getWeaknesses(types: string[]) {
-		const weaknesses: string[] = [];
-		const promises = types.map((t) => getWeaknessesForType(t, weaknesses));
-		await Promise.all(promises);
-		return weaknesses;
+		const promises = types.map(getWeaknessesForType);
+		const result = await Promise.all(promises);
+		return result.flat();
+	}
+
+	//to let the fav icon to be red if the pokemon in Fav List
+	function ispokemonInFav() {
+		const favs = imp?.getUserList();
+		const isPokemonFav =
+			favs?.some((pokemonId) => pokemonId === data.id.split(" ")[1]) || false;
+		setIsPressed(isPokemonFav);
 	}
 
 	useEffect(() => {
@@ -96,16 +110,15 @@ function AboutPokemon() {
 			));
 
 		setPokemonDetailsHtml(htmlCode);
+		ispokemonInFav();
 	}, [data]);
-
-	// Object.keys
 
 	const {
 		isPending: pokemonExtraDetailsIsPending,
 		error: pokemonExtraDetailsError,
 		data: pokemonExtraDetails,
 	} = useQuery({
-		queryKey: ["pokemonExtraDetails"],
+		queryKey: ["pokemonExtraDetails", data.id], //add the id
 		queryFn: () => getAboutCategoryGender(data.id),
 	});
 
@@ -147,12 +160,35 @@ function AboutPokemon() {
       grid-cols-2 justify-items-center items-center gap-5 p-8
       hover:shadow-2xl transition-shadow duration-300"
 			>
-				<h1
-					className="row-start-1 row-end-2 col-start-1 col-end-3 font-bold text-gray-800 text-2xl"
-					style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}
-				>
-					{data.name} {data.id}
-				</h1>
+				<div className="flex gap-20 text-center row-start-1 row-end-2 col-start-1 col-end-3 ">
+					<h1
+						className="font-bold text-gray-800 text-2xl"
+						style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}
+					>
+						{data.name} {data.id}
+					</h1>
+					<button
+						onClick={() => {
+							if (!isPressed) {
+								imp?.addToFavList({
+									pokemonId: data.id.split(" ")[1],
+									img: data.img,
+									name: data.name,
+								});
+								setIsPressed(true);
+							} else {
+								setIsPressed(false);
+								imp?.removeFromFavList(data.id.split(" ")[1]);
+							}
+						}}
+					>
+						{isPressed ? (
+							<MdFavorite color="red" size={40} />
+						) : (
+							<MdOutlineFavoriteBorder size={40} />
+						)}
+					</button>
+				</div>
 
 				<img
 					alt="how the pokemon looks like"
@@ -210,10 +246,10 @@ function AboutPokemon() {
 							WEAKNESSES
 						</p>
 						<div className="flex flex-row gap-2 flex-wrap">
-							{pokemonWeaknesses.map((weak: string) => (
+							{pokemonWeaknesses.map((weak: string, index) => (
 								<div
 									className="text-xs text-gray-900 bg-gray-300 rounded-lg shadow-md p-2 pl-4 pr-4 ring-1 ring-gray-400"
-									key={weak}
+									key={index}
 									style={{ textShadow: "1px 1px 5px rgba(0,0,0,0.3)" }}
 								>
 									{weak.toUpperCase()}
