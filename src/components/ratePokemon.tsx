@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { FaRegStar, FaStar } from "react-icons/fa6";
 import { useLocation } from "react-router-dom";
+import { UserContext } from "../contexts/context";
 
 function RatePokemon() {
 	const location = useLocation();
 	const pokemonObj = location.state || { name: "Pokemon", img: "", id: "0" };
+	const { ratings } = useContext(UserContext);
 
 	const [rating, setRating] = useState(1);
 	const [review, setReview] = useState("");
@@ -72,7 +74,17 @@ function RatePokemon() {
 						/>
 					</div>
 
-					<button className="bg-gray-800 text-white font-bold py-4 rounded-xl hover:bg-black">
+					<button
+						className="bg-gray-800 text-white font-bold py-4 rounded-xl hover:bg-black"
+						onClick={() => {
+							ratings?.addRatingReview({
+								pokemonId: pokemonObj.id.trim().split(" ")[1],
+								rating: rating,
+								review: review,
+							});
+							alert("Your review Submitted");
+						}}
+					>
 						Submit Review
 					</button>
 				</div>

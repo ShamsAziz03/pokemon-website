@@ -1,16 +1,39 @@
-import type { IFavourite, Pokemon } from "./IUserFeatures";
+import type {
+	IFavourite,
+	IRatingReview,
+	Pokemon,
+	Rating,
+} from "./IUserFeatures";
 
 type Favourites = {
 	userId: string;
 	FavPokemonList: Pokemon[];
 };
 
-export class LocalStorageUserFeatures implements IFavourite {
+type userRatingReview = {
+	userId: string;
+	rating: number;
+	review?: string;
+};
+
+type RatingsReviews = {
+	pokemonId: string;
+	pokemonRatingsReviews: userRatingReview[];
+};
+
+export class LocalStorageUserFeatures implements IFavourite, IRatingReview {
 	userId: string;
 	constructor(userId: string) {
 		this.userId = userId;
+
 		const intialFavList: Favourites[] = [];
 		localStorage.setItem("favList", JSON.stringify(intialFavList));
+
+		const intialRatingsReviewsList: RatingsReviews[] = [];
+		localStorage.setItem(
+			"ratingReviewsList",
+			JSON.stringify(intialRatingsReviewsList),
+		);
 	}
 
 	addToFavList(data: Pokemon) {
@@ -67,6 +90,69 @@ export class LocalStorageUserFeatures implements IFavourite {
 				(pokemonObj) => pokemonObj.pokemonId,
 			);
 			return favPokemons;
+		}
+		return [];
+	}
+
+	addRatingReview(pokemonInfo: Rating) {
+		const raw = localStorage.getItem("ratingReviewsList");
+		let ratingReviewsList: RatingsReviews[] = raw ? JSON.parse(raw) : [];
+
+		const indexOfPokemon = ratingReviewsList.findIndex(
+			(pokemonObj) => pokemonObj.pokemonId === pokemonInfo.pokemonId,
+		);
+		if (indexOfPokemon !== -1) {
+			//pokemon obj exist
+			//check if user has rating obj
+			const isUserRates = ratingReviewsList[
+				indexOfPokemon
+			].pokemonRatingsReviews.findIndex((obj) => obj.userId === this.userId);
+
+			if (isUserRates === -1) {
+				ratingReviewsList[indexOfPokemon].pokemonRatingsReviews.push({
+					userId: this.userId,
+					rating: pokemonInfo.rating,
+					review: pokemonInfo.review,
+				});
+			} else {
+				ratingReviewsList[indexOfPokemon].pokemonRatingsReviews[
+					isUserRates
+				].rating = pokemonInfo.rating;
+				ratingReviewsList[indexOfPokemon].pokemonRatingsReviews[
+					isUserRates
+				].review = pokemonInfo.review;
+			}
+		} else {
+			ratingReviewsList.push({
+				pokemonId: pokemonInfo.pokemonId,
+				pokemonRatingsReviews: [
+					{
+						userId: this.userId,
+						rating: pokemonInfo.rating,
+						review: pokemonInfo.review,
+					},
+				],
+			});
+		}
+		localStorage.setItem(
+			"ratingReviewsList",
+			JSON.stringify(ratingReviewsList),
+		);
+		console.log(JSON.stringify(ratingReviewsList, null, 2));
+	}
+
+	getPokemonRatings(pokemonId: string) {
+		const raw = localStorage.getItem("ratingReviewsList");
+		let ratingReviewsList: RatingsReviews[] = raw ? JSON.parse(raw) : [];
+
+		const indexOfPokemon = ratingReviewsList.findIndex(
+			(pokemonObj) => pokemonObj.pokemonId === pokemonId,
+		);
+
+		if (indexOfPokemon !== -1) {
+			return ratingReviewsList[indexOfPokemon].pokemonRatingsReviews.map(
+				(userObj) => userObj.rating,
+			);
 		}
 		return [];
 	}

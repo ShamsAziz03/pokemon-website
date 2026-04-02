@@ -17,7 +17,7 @@ function AboutPokemon() {
 	const data = location.state;
 	const navigate = useNavigate();
 
-	const { imp } = useContext(UserContext);
+	const { favourites, ratings } = useContext(UserContext);
 
 	const [pokemonDetailsHtml, setPokemonDetailsHtml] = useState<JSX.Element[]>(
 		[],
@@ -85,14 +85,18 @@ function AboutPokemon() {
 
 	//to let the fav icon to be red if the pokemon in Fav List
 	function ispokemonInFav() {
-		const favs = imp?.getUserList();
+		const favs = favourites?.getUserList();
 		const isPokemonFav =
 			favs?.some((pokemonId) => pokemonId === data.id.split(" ")[1]) || false;
 		setIsPressed(isPokemonFav);
 	}
 
 	function findAvgRating() {
-		setAvgRating(0);
+		const pokemonRatings = ratings?.getPokemonRatings(data.id.split(" ")[1]);
+		const sum =
+			pokemonRatings?.reduce((sum, currentValue) => sum + currentValue, 0) || 0;
+		const avg = sum / (pokemonRatings?.length || 1);
+		setAvgRating(avg);
 	}
 
 	useEffect(() => {
@@ -177,7 +181,7 @@ function AboutPokemon() {
 					<button
 						onClick={() => {
 							if (!isPressed) {
-								imp?.addToFavList({
+								favourites?.addToFavList({
 									pokemonId: data.id.split(" ")[1],
 									img: data.img,
 									name: data.name,
@@ -185,7 +189,7 @@ function AboutPokemon() {
 								setIsPressed(true);
 							} else {
 								setIsPressed(false);
-								imp?.removeFromFavList(data.id.split(" ")[1]);
+								favourites?.removeFromFavList(data.id.split(" ")[1]);
 							}
 						}}
 					>

@@ -1,20 +1,28 @@
 import { createContext } from "react";
-import type { IFavourite } from "../clasess/IUserFeatures";
+import type { IFavourite, IRatingReview } from "../clasess/IUserFeatures";
 import { LocalStorageUserFeatures } from "../clasess/LocalStorageUserFeatures";
 
-export const UserContext = createContext<{ imp?: IFavourite }>({
-	imp: undefined,
+export const UserContext = createContext<{
+	favourites?: IFavourite;
+	ratings?: IRatingReview;
+}>({
+	favourites: undefined,
+	ratings: undefined,
 });
 //to prevent use any so we remove createContext<any>({}); and do like above
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
 	const useLocalStorage = true;
-	const implementation: IFavourite = useLocalStorage //here the imp must be of interface type
+	const favourites: IFavourite = useLocalStorage //here the imp must be of interface type
 		? new LocalStorageUserFeatures("1")
 		: new LocalStorageUserFeatures("1"); //put backend option later
 
+	const ratings: IRatingReview = useLocalStorage
+		? new LocalStorageUserFeatures("1")
+		: new LocalStorageUserFeatures("1");
+
 	return (
-		<UserContext.Provider value={{ imp: implementation }}>
+		<UserContext.Provider value={{ favourites: favourites, ratings: ratings }}>
 			{children}
 		</UserContext.Provider>
 	);
