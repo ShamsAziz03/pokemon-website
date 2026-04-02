@@ -33,33 +33,35 @@ function Home() {
 		return filtered;
 	}
 
+	async function getPokemon() {
+		const randomId = Math.floor(Math.random() * 1025) + 1;
+		const details = await Axios.get(
+			`https://pokeapi.co/api/v2/pokemon/${randomId}`,
+		);
+
+		const types: string[] = details.data.types.map(
+			(type: { type: { name: string } }) => type.type.name.toUpperCase(),
+		);
+
+		const pokemonDetails = {
+			img: details.data.sprites.front_default,
+			name: details.data.name.toUpperCase(),
+			id: `# ${details.data.id}`,
+			types: types,
+			height: `${details.data.height} dm`,
+			weight: `${details.data.weight} lbs`,
+			abilities: details.data.abilities
+				.map((a: { ability: { name: string } }) => a.ability.name)
+				.join(", "),
+		};
+		return pokemonDetails;
+	}
+
 	async function getPokemonsList() {
-		const list: Pokemon[] = [];
-		for (let i = 0; i < 6; i++) {
-			const randomId = Math.floor(Math.random() * 1025) + 1;
-			const details = await Axios.get(
-				`https://pokeapi.co/api/v2/pokemon/${randomId}`,
-			);
-
-			const types: string[] = details.data.types.map(
-				(type: { type: { name: string } }) => type.type.name.toUpperCase(),
-			);
-
-			const pokemonDetails = {
-				img: details.data.sprites.front_default,
-				name: details.data.name.toUpperCase(),
-				id: `# ${details.data.id}`,
-				types: types,
-				height: `${details.data.height} dm`,
-				weight: `${details.data.weight} lbs`,
-				abilities: details.data.abilities
-					.map((a: { ability: { name: string } }) => a.ability.name)
-					.join(", "),
-			};
-
-			list.push(pokemonDetails);
-		}
-		return list;
+		const list = ["", "", "", "", "", ""];
+		const promises = list.map(getPokemon);
+		const result = await Promise.all(promises);
+		return result.flat();
 	}
 
 	const pokemons = () => {
