@@ -3,7 +3,7 @@ import Axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import type { JSX } from "react/jsx-dev-runtime";
 import { MdFavorite, MdOutlineFavoriteBorder } from "react-icons/md";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/context";
 
 type PokemonExtraDetails = {
@@ -15,6 +15,7 @@ type PokemonExtraDetails = {
 function AboutPokemon() {
 	const location = useLocation();
 	const data = location.state;
+	const navigate = useNavigate();
 
 	const { imp } = useContext(UserContext);
 
@@ -22,6 +23,7 @@ function AboutPokemon() {
 		[],
 	);
 	const [isPressed, setIsPressed] = useState(false);
+	const [avgRating, setAvgRating] = useState(0);
 
 	async function getAboutCategoryGender(id: string) {
 		const pokemonExtraDetails: PokemonExtraDetails = {
@@ -89,6 +91,10 @@ function AboutPokemon() {
 		setIsPressed(isPokemonFav);
 	}
 
+	function findAvgRating() {
+		setAvgRating(0);
+	}
+
 	useEffect(() => {
 		//to create the content of html to prevent copy and paste 3 times
 		const htmlCode = Object.keys(data)
@@ -111,6 +117,7 @@ function AboutPokemon() {
 
 		setPokemonDetailsHtml(htmlCode);
 		ispokemonInFav();
+		findAvgRating();
 	}, [data]);
 
 	const {
@@ -157,7 +164,7 @@ function AboutPokemon() {
 			<section
 				className="bg-gray-100 rounded-[20px] 
       shadow-xl border-2 border-gray-400 h-[90vh] w-[50%] grid [grid-template-rows:auto 1fr]
-      grid-cols-2 justify-items-center items-center gap-5 p-8
+      grid-cols-2 justify-items-center items-center gap-5 pl-5 pr-5 pt-3
       hover:shadow-2xl transition-shadow duration-300"
 			>
 				<div className="flex gap-20 text-center row-start-1 row-end-2 col-start-1 col-end-3 ">
@@ -190,11 +197,29 @@ function AboutPokemon() {
 					</button>
 				</div>
 
-				<img
-					alt="how the pokemon looks like"
-					className="w-[100%] h-[80%] row-start-2 col-start-1 border-2 border-gray-400 rounded-[15px] shadow-inner"
-					src={data.img}
-				/>
+				<div className="w-[100%] h-[100%] row-start-2 col-start-1 pb-5">
+					<img
+						alt="how the pokemon looks like"
+						className="w-[100%] h-[80%] border-2 border-gray-400 rounded-[15px] shadow-inner"
+						src={data.img}
+					/>
+					<div className="flex pt-5">
+						<span className="text-xl pr-3">Avg Rating: </span>
+						<p className="text-xl pl-3">{avgRating}</p>
+					</div>
+
+					<button
+						className="text-md font-semibold text-white bg-gray-800 rounded-[10px] shadow-xl w-[80%] p-1 mt-5 hover:bg-gray-400 border-2 hover:shadow-2xl hover:text-black"
+						onClick={() => {
+							navigate("/ratePokemon", {
+								state: { name: data.name, img: data.img, id: data.id },
+							});
+						}}
+						type="button"
+					>
+						Rate it Now
+					</button>
+				</div>
 
 				<div className="row-start-2 col-start-2 flex flex-col gap-3">
 					<h2
