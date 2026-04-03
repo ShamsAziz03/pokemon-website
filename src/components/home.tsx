@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import Axios from "axios";
 import Fuse from "fuse.js";
 import { useState } from "react";
-import { FaSearch } from "react-icons/fa";
+import { CgProfile } from "react-icons/cg";
+import { FaHeart, FaSearch } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import PokemonCard from "../components/pokemonCard";
 
 type Pokemon = {
@@ -17,6 +19,7 @@ type Pokemon = {
 
 function Home() {
 	const [searchText, setSearchText] = useState("");
+	const navigate = useNavigate();
 
 	function search(data: string) {
 		const names = pokemonList?.map((pokemon) => pokemon.name) || [];
@@ -76,6 +79,7 @@ function Home() {
 	} = useQuery({
 		queryKey: ["pokemonList"],
 		queryFn: () => getPokemonsList(),
+		refetchOnWindowFocus: false,
 	});
 
 	if (isPending)
@@ -100,18 +104,51 @@ function Home() {
 
 	return (
 		<>
-			<section className=" flex flex-row justify-center items-center p-5 gap-5">
-				<FaSearch color="black" size="20px" />
-				<input
-					className="w-[50%] h-[30px] bg-gray-200 rounded-[20px] shadow-xl border-2 border-black text-sm font-semibold text-black p-5"
-					id="input"
-					onInput={(event: React.InputEvent<HTMLInputElement>) => {
-						setSearchText(event.currentTarget.value.trim());
-					}}
-					placeholder="Search..."
-					type="text"
-				></input>
+			<section className=" flex w-[100%] justify-around items-center">
+				{/* search */}
+				<div className=" flex flex-row justify-center items-center p-5 gap-5 w-[50%]">
+					<FaSearch color="black" size="20px" />
+					<input
+						className="w-[100%] h-[30px] bg-gray-200 rounded-[20px] shadow-xl border-2 border-black text-sm font-semibold text-black p-5"
+						id="input"
+						onInput={(event: React.InputEvent<HTMLInputElement>) => {
+							setSearchText(event.currentTarget.value.trim());
+						}}
+						placeholder="Search..."
+						type="text"
+					></input>
+				</div>
+
+				<div className=" flex flex-row justify-center items-center gap-5">
+					{/* favorites */}
+					<div className=" flex flex-row justify-center items-center gap-2 text-white bg-gray-800 rounded-[10px] shadow-xl hover:text-black hover:shadow-2xl  p-3 hover:bg-gray-400 border-2 h-auto flex-wrap">
+						<FaHeart size={20} />
+						<button
+							className="text-sm font-semibold "
+							onClick={() => {
+								navigate("/favouritePage");
+							}}
+							type="button"
+						>
+							Favourites
+						</button>
+					</div>
+					{/* profile */}
+					<div className=" flex flex-row justify-center items-center gap-2 text-white bg-gray-800 rounded-[10px] shadow-xl hover:text-black hover:shadow-2xl  p-3 pl-6 pr-6 hover:bg-gray-400 border-2 h-auto flex-wrap">
+						<CgProfile size={20} />
+						<button
+							className="text-sm font-semibold "
+							onClick={() => {
+								navigate("/userProfile");
+							}}
+							type="button"
+						>
+							Profile
+						</button>
+					</div>
+				</div>
 			</section>
+
 			<section className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-20 p-10">
 				{pokemons()?.map((pokemon: Pokemon) => {
 					return (

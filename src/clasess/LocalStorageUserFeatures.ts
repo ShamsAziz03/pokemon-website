@@ -49,7 +49,7 @@ export class LocalStorageUserFeatures implements IFavourite, IRatingReview {
 			);
 
 			if (!isAlreadyFav) {
-				favList[indexOfUser].FavPokemonList.push({ ...data });
+				favList[indexOfUser].FavPokemonList.push(data);
 			}
 		} else {
 			favList.push({
@@ -78,6 +78,7 @@ export class LocalStorageUserFeatures implements IFavourite, IRatingReview {
 		}
 	}
 
+	//change name to is pokemon in fav
 	getUserList(): string[] {
 		//return list of poks ids only
 		const raw = localStorage.getItem("favList");
@@ -90,6 +91,20 @@ export class LocalStorageUserFeatures implements IFavourite, IRatingReview {
 				(pokemonObj) => pokemonObj.pokemonId,
 			);
 			return favPokemons;
+		}
+		return [];
+	}
+
+	//to return user's fav list to show it
+	getUsersFavList(): Pokemon[] {
+		//return list of poks ids only
+		const raw = localStorage.getItem("favList");
+		let favList: Favourites[] = raw ? JSON.parse(raw) : [];
+		const userObjectIndex = favList.findIndex(
+			(userObj) => userObj.userId === this.userId,
+		);
+		if (userObjectIndex !== -1) {
+			return favList[userObjectIndex].FavPokemonList;
 		}
 		return [];
 	}

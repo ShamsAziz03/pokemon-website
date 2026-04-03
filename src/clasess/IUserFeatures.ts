@@ -13,6 +13,7 @@ export interface IFavourite {
 	addToFavList(favouriteInfo: Pokemon): void;
 	removeFromFavList(pokemonId: string): void;
 	getUserList(): string[]; //must done so pokemons fav will shown in the first
+	getUsersFavList(): Pokemon[];
 }
 
 export interface IRatingReview {

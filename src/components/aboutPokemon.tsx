@@ -131,6 +131,7 @@ function AboutPokemon() {
 	} = useQuery({
 		queryKey: ["pokemonExtraDetails", data.id], //add the id
 		queryFn: () => getAboutCategoryGender(data.id),
+		refetchOnWindowFocus: false,
 	});
 
 	const {
@@ -140,6 +141,7 @@ function AboutPokemon() {
 	} = useQuery({
 		queryKey: ["pokemonWeaknesses"],
 		queryFn: () => getWeaknesses(data.types),
+		refetchOnWindowFocus: false,
 	});
 
 	if (pokemonExtraDetailsIsPending || pokemonWeaknessesIsPending)
