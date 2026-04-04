@@ -38,9 +38,9 @@ function ReviewRatingsPage() {
 		error: imagesNamesError,
 		data: imagesNamesList,
 	} = useQuery({
-		queryKey: ["imagesNamesList"],
+		queryKey: ["imagesNamesList", ratingList],
 		queryFn: () => getImgsNames(),
-		enabled: !!ratingList && ratingList.length > 0,
+		enabled: !!ratingList, //if it undefiened or null don't enable this
 	});
 	if (isPending || isImagesNamesPending)
 		return (
@@ -81,15 +81,20 @@ function ReviewRatingsPage() {
 							className="w-[100%] flex flex-row items-center gap-4 p-3 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md"
 							key={ratingObj.pokemonId}
 						>
-							<img
-								alt={imagesNamesList[index].img}
-								className="w-16 h-16"
-								src={imagesNamesList[index].img}
-							/>
+							{imagesNamesList?.[index] && (
+								<>
+									<img
+										alt={imagesNamesList[index].img}
+										className="w-16 h-16"
+										src={imagesNamesList[index].img}
+									/>
 
-							<span className="text-xl font-semibold capitalize text-gray-900 mr-10">
-								{imagesNamesList[index].name}
-							</span>
+									<span className="text-xl font-semibold capitalize text-gray-900 mr-10">
+										{imagesNamesList[index].name}
+									</span>
+								</>
+							)}
+
 							<div className="flex flex-col gap-3">
 								<span className="text-lg font-semibold capitalize text-gray-900">
 									Rating: {ratingObj.rating}
