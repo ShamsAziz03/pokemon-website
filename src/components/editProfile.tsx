@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { UserContext } from "../contexts/context";
 
 function EditProfile() {
-	const { loggedUser, authProvider } = useContext(UserContext);
+	const { loggedUser, authProvider, setLoggedUser } = useContext(UserContext);
 	const [name, setName] = useState(loggedUser?.name ?? "");
 	const [email, setEmail] = useState(loggedUser?.email ?? "");
 	const [phone, setPhone] = useState(loggedUser?.phone ?? "");
@@ -114,8 +114,18 @@ function EditProfile() {
 								email: email,
 								id: loggedUser.id,
 							});
-							if (success) alert("Update Success");
-							else alert("Error Happened");
+							if (success) {
+								setLoggedUser?.({
+									name: name,
+									phone: phone,
+									gender: gender,
+									birthday: birthday,
+									password: loggedUser.password,
+									email: email,
+									id: loggedUser.id,
+								});
+								alert("Update Success");
+							} else alert("Error Happened");
 						}
 					}}
 					type="button"
