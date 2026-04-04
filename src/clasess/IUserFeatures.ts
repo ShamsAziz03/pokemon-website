@@ -51,6 +51,6 @@ export interface IRatingReview {
 export interface IUser {
 	addUser(userInfo: UserInfo): boolean; //for signup
 	editUserInfo(userInfo: LoggedUser): boolean; // for edit profile
-	isUserInSystem(email: string, password: string): LoggedUser | null; //for login
+	isUserInSystem(email: string): LoggedUser | null; //for login
 	// not create function get all users, no create this instead since same bussiness
 }

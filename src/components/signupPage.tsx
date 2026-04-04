@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/context";
@@ -12,6 +13,26 @@ function SignUpPage() {
 	const [gender, setGender] = useState("female");
 	const [birthday, setBirthday] = useState("");
 	const [password, setPassword] = useState("");
+
+	async function signUpProcess() {
+		const salt = await bcrypt.genSalt(10);
+		const hashedPass = await bcrypt.hash(password, salt);
+
+		const addUser = authProvider?.addUser({
+			name: name,
+			email: email,
+			phone: phone,
+			gender: gender,
+			birthday: birthday,
+			password: hashedPass,
+		});
+		if (addUser) {
+			alert("Sign up Success.");
+			navigate("/");
+		} else {
+			alert("This Email is Already Used, Choose another one.");
+		}
+	}
 
 	return (
 		<section className="w-[100%] h-[100vh] bg-gray-200 flex flex-col justify-center items-center p-4">
@@ -130,22 +151,7 @@ function SignUpPage() {
 
 				<button
 					className="mt-2 rounded-lg bg-gray-600 py-3 text-white font-semibold hover:bg-gray-700 transition"
-					onClick={() => {
-						const addUser = authProvider?.addUser({
-							name: name,
-							email: email,
-							phone: phone,
-							gender: gender,
-							birthday: birthday,
-							password: password,
-						});
-						if (addUser) {
-							alert("Sign up Success.");
-							navigate("/");
-						} else {
-							alert("This Email is Already Used, Choose another one.");
-						}
-					}}
+					onClick={signUpProcess}
 					type="button"
 				>
 					Sign Up

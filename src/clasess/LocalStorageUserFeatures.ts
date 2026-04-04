@@ -284,10 +284,10 @@ export class LocalStorageUserFeatures
 		return false;
 	} // for edit profile
 
-	isUserInSystem(email: string, password: string) {
+	isUserInSystem(email: string) {
 		const raw = localStorage.getItem("users");
 		let users: Users = raw ? JSON.parse(raw) : {};
-		if (users[email] !== undefined && users[email].password === password) {
+		if (users[email] !== undefined) {
 			return {
 				name: users[email].name,
 				phone: users[email].phone,

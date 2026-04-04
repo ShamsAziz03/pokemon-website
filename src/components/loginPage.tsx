@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/context";
@@ -5,6 +6,36 @@ import { UserContext } from "../contexts/context";
 function LoginPage() {
 	const navigate = useNavigate();
 	const { authProvider, setLoggedUser } = useContext(UserContext);
+
+	async function logInProcess() {
+		const password = (document.getElementById("password") as HTMLInputElement)
+			.value;
+		const isExist = authProvider?.isUserInSystem(
+			(document.getElementById("email") as HTMLInputElement).value,
+		);
+		if (isExist) {
+			//not null
+			const isPassCorrect = await bcrypt.compare(password, isExist.password); // true or false
+
+			if (isPassCorrect) {
+				setLoggedUser?.({
+					name: isExist.name,
+					phone: isExist.phone,
+					gender: isExist.gender,
+					birthday: isExist.birthday,
+					password: isExist.password,
+					email: isExist.email,
+					id: isExist.id,
+				});
+
+				navigate("/home");
+			} else {
+				alert("Password not Correct!");
+			}
+		} else {
+			alert("Email not Correct!");
+		}
+	}
 
 	useEffect(() => {
 		//let logged user={}
@@ -66,27 +97,7 @@ function LoginPage() {
 
 					<button
 						className="mt-2 rounded-lg bg-gray-600 py-3 text-white font-semibold hover:bg-gray-700"
-						onClick={() => {
-							const isExist = authProvider?.isUserInSystem(
-								(document.getElementById("email") as HTMLInputElement).value,
-								(document.getElementById("password") as HTMLInputElement).value,
-							);
-							if (isExist) {
-								//not null
-								setLoggedUser?.({
-									name: isExist.name,
-									phone: isExist.phone,
-									gender: isExist.gender,
-									birthday: isExist.birthday,
-									password: isExist.password,
-									email: isExist.email,
-									id: isExist.id,
-								});
-								navigate("/home");
-							} else {
-								alert("Email or Password not Correct!");
-							}
-						}}
+						onClick={logInProcess}
 						type="button"
 					>
 						Login
