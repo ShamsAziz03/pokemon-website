@@ -80,6 +80,7 @@ function Home() {
 		queryKey: ["pokemonList"],
 		queryFn: () => getPokemonsList(),
 		refetchOnWindowFocus: false,
+		refetchOnMount: false,
 	});
 
 	if (isPending)
@@ -150,9 +151,9 @@ function Home() {
 			</section>
 
 			<section className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-20 p-10">
-				{pokemons()?.map((pokemon: Pokemon) => {
+				{pokemons()?.map((pokemon: Pokemon, index) => {
 					return (
-						<div key={pokemon.id}>
+						<div key={index}>
 							<PokemonCard pokemonDetails={pokemon} />
 						</div>
 					);

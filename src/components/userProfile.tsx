@@ -1,19 +1,23 @@
+import { useContext } from "react";
 import { CgProfile } from "react-icons/cg";
 import { IoIosLogOut } from "react-icons/io";
 import { MdOutlineFavorite, MdReviews } from "react-icons/md";
+import { UserContext } from "../contexts/context";
 import ProfileButton from "./profileButton";
 
 function UserProfile() {
 	const menuItems = [
-		{ icon: CgProfile, label: "Edit Profile", goTo: "/favouritePage" },
+		{ icon: CgProfile, label: "Edit Profile", goTo: "/editProfile" },
 		{ icon: MdOutlineFavorite, label: "My Favorites", goTo: "/favouritePage" },
 		{
 			icon: MdReviews,
 			label: "My Reviews and Ratings",
 			goTo: "/reviewRatingsPage",
 		},
-		{ icon: IoIosLogOut, label: "Log Out", goTo: "/favouritePage" },
+		{ icon: IoIosLogOut, label: "Log Out", goTo: "/" },
 	];
+
+	const { loggedUser } = useContext(UserContext);
 
 	return (
 		<section className="bg-gray-200 flex flex-col gap-5 justify-center items-center p-4 h-[100vh]">
@@ -31,9 +35,11 @@ function UserProfile() {
 				<div className="flex flex-col justify-center items-center">
 					<CgProfile size={100} />
 					<h2 className="shadow-2xl text-xl text-gray-500 font-semibold">
-						Shams Aziz
+						{loggedUser?.name}
 					</h2>
-					<p className="text-md text-gray-400 font-semibold">shams@gmail.com</p>
+					<p className="text-md text-gray-400 font-semibold">
+						{loggedUser?.email}
+					</p>
 				</div>
 				<div className="w-[100%] flex flex-col gap-5">
 					{menuItems.map((item, index) => {

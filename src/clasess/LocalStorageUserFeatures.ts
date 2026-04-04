@@ -1,8 +1,12 @@
 import type {
 	IFavourite,
 	IRatingReview,
+	IUser,
+	LoggedUser,
 	Pokemon,
 	Rating,
+	UserInfo,
+	UserStoredData,
 } from "./IUserFeatures";
 
 type Favourites = {
@@ -21,19 +25,46 @@ type RatingsReviews = {
 	pokemonRatingsReviews: userRatingReview[];
 };
 
-export class LocalStorageUserFeatures implements IFavourite, IRatingReview {
+type Users = {
+	[email: string]: UserStoredData;
+};
+
+export class LocalStorageUserFeatures
+	implements IFavourite, IRatingReview, IUser
+{
 	userId: string;
-	constructor(userId: string) {
+	constructor(userId: string = "0") {
 		this.userId = userId;
 
-		const intialFavList: Favourites[] = [];
-		localStorage.setItem("favList", JSON.stringify(intialFavList));
+		const rawFav = localStorage.getItem("favList");
+		if (!rawFav) {
+			const intialFavList: Favourites[] = [];
+			localStorage.setItem("favList", JSON.stringify(intialFavList));
+		}
 
-		const intialRatingsReviewsList: RatingsReviews[] = [];
-		localStorage.setItem(
-			"ratingReviewsList",
-			JSON.stringify(intialRatingsReviewsList),
-		);
+		const rawRatings = localStorage.getItem("ratingReviewsList");
+		if (!rawRatings) {
+			const intialRatingsReviewsList: RatingsReviews[] = [];
+			localStorage.setItem(
+				"ratingReviewsList",
+				JSON.stringify(intialRatingsReviewsList),
+			);
+		}
+
+		const rawUsers = localStorage.getItem("users");
+		if (!rawUsers) {
+			const users: Users = {
+				"shams@gmail.com": {
+					id: "1",
+					name: "shams",
+					phone: "123456789",
+					gender: "male",
+					birthday: "1980-01-01",
+					password: "123",
+				},
+			};
+			localStorage.setItem("users", JSON.stringify(users));
+		}
 	}
 
 	addToFavList(data: Pokemon) {
@@ -205,5 +236,68 @@ export class LocalStorageUserFeatures implements IFavourite, IRatingReview {
 			.filter((review) => review !== null); //to remove nulls from array
 
 		return userReviewsRatings;
+	}
+
+	//implement login signup functions - 3
+	addUser(userInfo: UserInfo) {
+		const raw = localStorage.getItem("users");
+		let users: Users = raw ? JSON.parse(raw) : {};
+		if (!users[userInfo.email]) {
+			//user not exist - returned undefined
+			users[userInfo.email] = {
+				id: (Date.now() + Math.floor(Math.random() * 1000)).toString(),
+				name: userInfo.name,
+				phone: userInfo.phone,
+				gender: userInfo.gender,
+				birthday: userInfo.birthday,
+				password: userInfo.password,
+			};
+			localStorage.setItem("users", JSON.stringify(users));
+			return true;
+		}
+		return false; //email is used
+	} //for signup
+
+	editUserInfo(userInfo: LoggedUser) {
+		const raw = localStorage.getItem("users");
+		const usersObj: Users = raw ? JSON.parse(raw) : {};
+		const usersArray = Object.entries(usersObj);
+		let userExist = 0;
+		usersArray.forEach((userKeyValueArray) => {
+			if (userKeyValueArray[1].id === this.userId) {
+				userExist = 1;
+				const oldEmail = userKeyValueArray[0];
+				usersObj[oldEmail].birthday = userInfo.birthday;
+				usersObj[oldEmail].gender = userInfo.gender;
+				usersObj[oldEmail].name = userInfo.name;
+				usersObj[oldEmail].phone = userInfo.phone;
+
+				if (oldEmail !== userInfo.email) {
+					const newInfo = usersObj[oldEmail];
+					usersObj[userInfo.email] = newInfo;
+					delete usersObj[oldEmail];
+				}
+				localStorage.setItem("users", JSON.stringify(usersObj));
+			}
+		});
+		if (userExist === 1) return true;
+		return false;
+	} // for edit profile
+
+	isUserInSystem(email: string, password: string) {
+		const raw = localStorage.getItem("users");
+		let users: Users = raw ? JSON.parse(raw) : {};
+		if (users[email] !== undefined && users[email].password === password) {
+			return {
+				name: users[email].name,
+				phone: users[email].phone,
+				gender: users[email].gender,
+				birthday: users[email].birthday,
+				password: users[email].password,
+				email: email,
+				id: users[email].id,
+			};
+		}
+		return null; //user not exist
 	}
 }
