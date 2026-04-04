@@ -1,22 +1,53 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useContext } from "react";
-import { FaTrashAlt } from "react-icons/fa";
-import { UserContext } from "../contexts/context";
+import { CgProfile } from "react-icons/cg";
+import { IoIosLogOut } from "react-icons/io";
+import { MdOutlineFavorite, MdReviews } from "react-icons/md";
+import ProfileButton from "./profileButton";
 
 function UserProfile() {
+	const menuItems = [
+		{ icon: CgProfile, label: "Edit Profile", goTo: "/favouritePage" },
+		{ icon: MdOutlineFavorite, label: "My Favorites", goTo: "/favouritePage" },
+		{
+			icon: MdReviews,
+			label: "My Reviews and Ratings",
+			goTo: "/reviewRatingsPage",
+		},
+		{ icon: IoIosLogOut, label: "Log Out", goTo: "/favouritePage" },
+	];
+
 	return (
-		<section className="bg-gray-200 h-screen flex justify-center items-center p-4">
-			<section
-				className="bg-white rounded-[30px] shadow-2xl border-2 border-gray-300 
-                h-[90vh] w-[80%] flex flex-col gap-10 p-10 hover:shadow-2xl"
+		<section className="bg-gray-200 flex flex-col gap-5 justify-center items-center p-4 h-[100vh]">
+			<h1
+				className="w-[50%] font-black text-gray-800 text-4xl"
+				style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.1)" }}
 			>
-				<h1
-					className="font-black text-gray-800 text-4xl"
-					style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.1)" }}
-				>
-					Your Profile
-				</h1>
-			</section>
+				Your Profile
+			</h1>
+
+			<div
+				className="bg-white rounded-[30px] shadow-2xl border-2 border-gray-300 
+                h-[80vh] w-[50%] flex flex-col justify-center items-center gap-6 p-10 hover:shadow-2xl"
+			>
+				<div className="flex flex-col justify-center items-center">
+					<CgProfile size={100} />
+					<h2 className="shadow-2xl text-xl text-gray-500 font-semibold">
+						Shams Aziz
+					</h2>
+					<p className="text-md text-gray-400 font-semibold">shams@gmail.com</p>
+				</div>
+				<div className="w-[100%] flex flex-col gap-5">
+					{menuItems.map((item, index) => {
+						return (
+							<ProfileButton
+								goTo={item.goTo}
+								icon={item.icon}
+								key={index}
+								label={item.label}
+							/>
+						);
+					})}
+				</div>
+			</div>
 		</section>
 	);
 }

@@ -19,4 +19,5 @@ export interface IFavourite {
 export interface IRatingReview {
 	addRatingReview(pokemonInfo: Rating): void;
 	getPokemonRatings(pokemonId: string): number[];
+	getUserRatingsReview(): Rating[];
 }

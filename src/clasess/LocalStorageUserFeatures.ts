@@ -109,6 +109,7 @@ export class LocalStorageUserFeatures implements IFavourite, IRatingReview {
 		return [];
 	}
 
+	//implement review rating Interface functions
 	addRatingReview(pokemonInfo: Rating) {
 		const raw = localStorage.getItem("ratingReviewsList");
 		let ratingReviewsList: RatingsReviews[] = raw ? JSON.parse(raw) : [];
@@ -170,5 +171,39 @@ export class LocalStorageUserFeatures implements IFavourite, IRatingReview {
 			);
 		}
 		return [];
+	}
+
+	getUserReview(
+		pokemonReviews: userRatingReview[],
+		pokemonId: string,
+	): Rating | null {
+		const userIndex = pokemonReviews.findIndex(
+			(review) => review.userId === this.userId,
+		);
+		if (userIndex !== -1) {
+			return {
+				pokemonId: pokemonId,
+				rating: pokemonReviews[userIndex].rating,
+				review: pokemonReviews[userIndex].review,
+			};
+		} else {
+			return null;
+		}
+	}
+
+	getUserRatingsReview(): Rating[] {
+		const raw = localStorage.getItem("ratingReviewsList");
+		let ratingReviewsList: RatingsReviews[] = raw ? JSON.parse(raw) : [];
+
+		const userReviewsRatings = ratingReviewsList
+			.map((pokemonObj) =>
+				this.getUserReview(
+					pokemonObj.pokemonRatingsReviews,
+					pokemonObj.pokemonId,
+				),
+			)
+			.filter((review) => review !== null); //to remove nulls from array
+
+		return userReviewsRatings;
 	}
 }

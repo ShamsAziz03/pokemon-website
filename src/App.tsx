@@ -5,6 +5,7 @@ import AboutPokemon from "./components/aboutPokemon";
 import FavouritePage from "./components/favouritePage";
 import Home from "./components/home";
 import RatePokemon from "./components/ratePokemon";
+import ReviewRatingsPage from "./components/reviewRatingsPage";
 import UserProfile from "./components/userProfile";
 import UserProvider from "./contexts/context";
 
@@ -17,11 +18,12 @@ function App() {
 				<BrowserRouter basename="/pokemon-website">
 					<Routes>
 						<Route element={<Home />} path="/" />
-						<Route element={<AboutPokemon />} path="/aboutPokemon" />{" "}
+						<Route element={<AboutPokemon />} path="/aboutPokemon" />
 						{/* add id with path of the pokemon about page, so user can load the page with path, without need to click on button details */}
 						<Route element={<RatePokemon />} path="/ratePokemon" />
 						<Route element={<FavouritePage />} path="/favouritePage" />
 						<Route element={<UserProfile />} path="/userProfile" />
+						<Route element={<ReviewRatingsPage />} path="/reviewRatingsPage" />
 					</Routes>
 				</BrowserRouter>
 			</QueryClientProvider>
