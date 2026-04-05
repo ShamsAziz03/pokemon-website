@@ -72,6 +72,41 @@ function Home() {
 		return search(searchText);
 	};
 
+	async function storePokemonOfDay() {
+		const result = await getPokemon();
+		const d = new Date();
+		let day = d.getDay();
+		const pokemonObj = { day: day, pokemonDetails: { ...result } };
+		localStorage.setItem("currentPokemon", JSON.stringify(pokemonObj));
+		return pokemonObj.pokemonDetails;
+	}
+
+	function getPokemonOfDay() {
+		const currentPokemon = localStorage.getItem("currentPokemon");
+		if (!currentPokemon) {
+			return storePokemonOfDay();
+		} else {
+			const currentPokemonDetails = JSON.parse(currentPokemon);
+			const day = new Date().getDay();
+			if (day === currentPokemonDetails.day) {
+				return currentPokemonDetails.pokemonDetails;
+			} else {
+				//means the stored one is from diff day
+				return storePokemonOfDay();
+			}
+		}
+	}
+
+	const {
+		isPending: pokemonOfDayPending,
+		error: errorPokemonOfDay,
+		data: pokemonOfDay,
+	} = useQuery({
+		queryKey: ["pokemonOfDay"],
+		queryFn: () => getPokemonOfDay(),
+		refetchOnWindowFocus: false,
+	});
+
 	const {
 		isPending,
 		error,
@@ -83,7 +118,7 @@ function Home() {
 		refetchOnMount: false,
 	});
 
-	if (isPending)
+	if (isPending || pokemonOfDayPending)
 		return (
 			<h1
 				className="row-start-1 row-end-2 col-start-1 col-end-3 font-bold text-gray-800 text-2xl"
@@ -93,13 +128,13 @@ function Home() {
 			</h1>
 		);
 
-	if (error)
+	if (error || errorPokemonOfDay)
 		return (
 			<h1
 				className="row-start-1 row-end-2 col-start-1 col-end-3 font-bold text-gray-800 text-2xl"
 				style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}
 			>
-				An error has occurred: {error.message}
+				An error has occurred: {error?.message ?? errorPokemonOfDay?.message}
 			</h1>
 		);
 
@@ -151,6 +186,7 @@ function Home() {
 			</section>
 
 			<section className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-20 p-10">
+				{pokemonOfDay && <PokemonCard pokemonDetails={pokemonOfDay} />}
 				{pokemons()?.map((pokemon: Pokemon, index) => {
 					return (
 						<div key={index}>
